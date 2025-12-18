@@ -465,12 +465,51 @@ if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
                 .then(() => console.log("Offline mode active!"))
                 .catch(err => console.log("Offline mode failed: ", err));
         }
+        let wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake Lock is active!');
+            
+            // Re-request if the app is minimized and then brought back
+            wakeLock.addEventListener('release', () => {
+                console.log('Wake Lock was released');
+            });
+        }
+    } catch (err) {
+        console.error(${err.name}, ${err.message});
+    }
+}
+
+// Update your existing activateApp function to include the lock
+function activateApp() {
+    const audio = document.getElementById('alarmSound');
+    
+    audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        isSessionActive = true;
+        
+        // REQUEST WAKE LOCK HERE
+        requestWakeLock();
+
+        document.getElementById('startApp').style.display = 'none';
+        document.getElementById('alarm-status').innerText = "System: Online & Awake";
+    }).catch(e => alert("Tap again to enable."));
+
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
+}
 
     </script>
 </body>
 
 
 </html>
+
 
 
 
