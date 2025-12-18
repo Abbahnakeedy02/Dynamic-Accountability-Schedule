@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alarm-cache-v1';
+const CACHE_NAME = 'scheduler-v1';
 const ASSETS = [
     './index.html', // Use your actual file name
     'https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg'
@@ -19,4 +19,5 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+
 
