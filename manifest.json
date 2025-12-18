@@ -1,0 +1,15 @@
+{
+  "short_name": "TaskTracker",
+  "name": "Weekly Task Commitment Optimizer",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/311/311101.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#2c3e50",
+  "background_color": "#f4f7f6"
+}
