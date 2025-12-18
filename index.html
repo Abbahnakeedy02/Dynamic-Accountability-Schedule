@@ -206,12 +206,13 @@ function initSession() {
 // 2. Reliable Mobile Notifications
 function sendNotification(taskName) {
     if (Notification.permission === "granted") {
-        // Mobile browsers prefer showing notifications via the Service Worker
+        // This wakes up the service worker to show the alert offline
         navigator.serviceWorker.ready.then(registration => {
             registration.showNotification("Task Reminder", {
-                body: `Time for: ${taskName}`,
-                icon: "https://cdn-icons-png.flaticon.com/512/311/311101.png",
-                vibrate: [200, 100, 200]
+                body: Starting: ${taskName},
+                vibrate: [200, 100, 200],
+                tag: 'task-alert', // Prevents multiple notifications from stacking
+                renotify: true
             });
         });
     }
@@ -469,6 +470,7 @@ if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
 
 
 </html>
+
 
 
 
