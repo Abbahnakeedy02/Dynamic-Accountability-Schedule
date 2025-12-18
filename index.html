@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Objective Quiz (170 Questions)</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font family -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom styling for options to handle code snippets better */
+        .option-button {
+            white-space: pre-wrap; /* Allows text to wrap naturally */
+            text-align: left;
+            padding: 1rem;
+            line-height: 1.5;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen flex items-start justify-center p-4 sm:p-8">
+
+    <!-- Quiz Container Card -->
+    <div id="quiz-container" class="w-full max-w-xl bg-white rounded-xl shadow-2xl p-6 sm:p-8 space-y-6 mt-10">
+
+        <!-- Header -->
+        <header class="text-center space-y-2">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-800">Java Objective Quiz (170 Qs)</h1>
+            <div id="user-info" class="flex justify-between text-sm text-gray-500 border-b pb-3">
+                <span>User ID: Loading...</span>
+                <span id="score-display">Current Score: 0 / 170</span>
+            </div>
+        </header>
+
+        <!-- Jump to Question Section -->
+        <div class="flex flex-col sm:flex-row gap-2">
+            <input type="number" id="jump-input" placeholder="Go to Q# (1-170)" min="1" max="170" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+            <button id="jump-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Jump
+            </button>
+        </div>
+
+        <!-- Question Display Area -->
+        <div id="question-area" class="space-y-4">
+            <div id="question-number" class="text-blue-600 font-bold text-lg">Choose Option To Continue...</div>
+            <p id="question-text" class="text-lg text-gray-800 whitespace-pre-wrap leading-relaxed"></p>
+        </div>
+
+        <!-- Options Section -->
+        <div id="options-container" class="space-y-3">
+            <!-- Options will be dynamically inserted here -->
+        </div>
+
+        <!-- Feedback and Score Section -->
+        <div id="feedback-area" class="min-h-[50px] space-y-2">
+            <!-- Feedback message (e.g., Wrong! Correct answer highlighted in green.) -->
+            <p id="feedback-message" class="font-semibold text-red-600 hidden"></p>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between flex-wrap gap-3 pt-2 border-t mt-4">
+            <button id="prev-btn" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150" disabled>
+                Previous Question
+            </button>
+            <button id="next-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                Next Question
+            </button>
+            <button id="end-quiz-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                End Quiz
+            </button>
+        </div>
+
+        <footer class="text-center text-xs text-gray-400 mt-4 pt-4 border-t">
+            Powered by El_Nakeedy Design Hub
+        </footer>
+
+    </div>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, userId = 'simulated-user';
+
+        // --- Firebase Initialization and Authentication ---
+        const initFirebase = async () => {
+            try {
+                if (Object.keys(firebaseConfig).length > 0) {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    userId = auth.currentUser?.uid || 'anonymous-user';
+                }
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                // Fallback to simulated ID
+            }
+            document.querySelector('#user-info span:first-child').textContent = `User ID: ${userId.substring(0, 8)}...`;
+            window.app_initialized = true;
+            window.userId = userId;
+        };
+
+        initFirebase();
+    </script>
+
+    <!-- Quiz Logic -->
+    <script>
+        // --- 170 QUESTIONS ARRAY ---
+        // Q: question text, options: array of options (A, B, C, D), answer: correct option index (0 for A, 1 for B, 2 for C, 3 for D)
+        const allQuestions = [
+            // Q1-Q70 from Java_Objective_Questions.pdf
+            { q: 'Which of the following correctly defines a class in Java?', options: ['A) A class is a template for creating objects', 'B) A class is an instance of an object', 'C) A class is used only to store data', 'D) A class cannot contain methods'], answer: 0 },
+            { q: 'What is the default value of an uninitialized object reference in Java?', options: ['A) 0', 'B) null', 'C) undefined', 'D) empty'], answer: 1 },
+            { q: 'Which keyword is used to create an object in Java?', options: ['A) object', 'B) alloc', 'C) new', 'D) malloc'], answer: 2 },
+            { q: 'What is true about constructors in Java?', options: ['A) They can return a value', 'B) They have the same name as the class', 'C) They must be declared static', 'D) They can be inherited'], answer: 1 },
+            { q: 'Which of the following allows access to class members without creating an object?', options: ['A) private methods', 'B) instance methods', 'C) static methods', 'D) constructors'], answer: 2 },
+            { q: 'When an array is declared but not initialized, what does Java allocate?', options: ['A) Memory with zero values', 'B) Null references for each element', 'C) Default primitive values', 'D) No memory until initialization'], answer: 3 },
+            { q: 'What will happen if you access an array index out of bounds?', options: ['A) It wraps to the beginning', 'B) It returns null', 'C) It throws ArrayIndexOutOfBoundsException', 'D) It ignores the access'], answer: 2 },
+            { q: 'Which of these loop constructs guarantees at least one execution?', options: ['A) for loop', 'B) while loop', 'C) do-while loop', 'D) if-else block'], answer: 2 },
+            { q: 'What is the purpose of the "this" keyword in Java?', options: ['A) Refers to the current class instance', 'B) Refers to the parent class', 'C) Used for method overriding', 'D) Declares a final variable'], answer: 0 },
+            { q: 'Which access modifier restricts access to the class and its subclasses within the same package?', options: ['A) private', 'B) public', 'C) protected', 'D) default (package-private)'], answer: 2 },
+            { q: 'Which statement correctly declares and initializes a 2D array in Java?', options: ['A) int[][] arr = {{1, 2}, {3, 4}};', 'B) int[2][2] arr = {1, 2, 3, 4};', 'C) int arr[][] = new int[2];', 'D) array int[][] arr;'], answer: 0 },
+            { q: 'How can you prevent a class from being inherited?', options: ['A) Declare it public', 'B) Declare it abstract', 'C) Declare it final', 'D) Declare it static'], answer: 2 },
+            { q: 'What is method overloading?', options: ['A) Defining a method in a subclass with the same signature as in the superclass', 'B) Defining multiple methods in the same class with the same name but different parameters', 'C) Defining multiple methods in a class with the same name and same parameters', 'D) Changing the return type of an inherited method'], answer: 1 },
+            { q: 'In a for loop, which component is executed only once?', options: ['A) The loop body', 'B) The initialization expression', 'C) The termination expression', 'D) The iteration expression'], answer: 1 },
+            { q: 'Which of the following is NOT a primitive data type in Java?', options: ['A) int', 'B) float', 'C) String', 'D) char'], answer: 2 },
+            { q: 'Which concept allows a subclass object to be treated as a superclass object?', options: ['A) Encapsulation', 'B) Abstraction', 'C) Polymorphism', 'D) Inheritance'], answer: 2 },
+            { q: 'What does the "static" keyword primarily indicate in a method?', options: ['A) The method can be overridden', 'B) The method belongs to the class, not a specific object', 'C) The method can only be accessed within the class', 'D) The method cannot be changed'], answer: 1 },
+            { q: 'Which statement about the "main" method signature is correct?', options: ['A) It must be static and public, and return void', 'B) It must be public, but can be non-static', 'C) It can return any value', 'D) It must be private'], answer: 0 },
+            { q: 'What happens when a "break" statement is encountered inside a switch case?', options: ['A) The program terminates', 'B) The control jumps to the next iteration of a loop', 'C) The control jumps to the end of the switch statement', 'D) It causes a runtime error'], answer: 2 },
+            { q: 'How do you correctly cast a double to an int in Java?', options: ['A) int i = (int) d;', 'B) int i = d.intValue();', 'C) int i = (int) d.round();', 'D) int i = d;'], answer: 0 },
+            { q: 'Which class is the root of the Java class hierarchy?', options: ['A) System', 'B) Main', 'C) Object', 'D) Class'], answer: 2 },
+            { q: 'Which type of variables are created when an object is instantiated?', options: ['A) Local variables', 'B) Static variables', 'C) Instance variables', 'D) Class variables'], answer: 2 },
+            { q: 'What is the result of 10 / 3 in Java?', options: ['A) 3.333', 'B) 3', 'C) 3.0', 'D) A runtime error'], answer: 1 },
+            { q: 'Which method is used to compare two String objects for equality of content?', options: ['A) ==', 'B) equals()', 'C) compare()', 'D) matches()'], answer: 1 },
+            { q: 'What is the purpose of the "super" keyword?', options: ['A) To call the superclass\'s constructor or methods', 'B) To declare a final class', 'C) To declare a static variable', 'D) To create an interface'], answer: 0 },
+            { q: 'Which keyword is used to handle exceptions in Java?', options: ['A) thrown', 'B) catch', 'C) exception', 'D) finally'], answer: 1 },
+            { q: 'Which statement about interfaces in Java is correct?', options: ['A) An interface can contain constructors', 'B) An interface can contain only abstract methods (before Java 8)', 'C) An interface can be instantiated', 'D) All interface methods must be private'], answer: 1 },
+            { q: 'Which is the correct way to calculate the length of an array named arr?', options: ['A) arr.size()', 'B) arr.length()', 'C) arr.length', 'D) size(arr)'], answer: 2 },
+            { q: 'What is autoboxing in Java?', options: ['A) Automatic conversion of a primitive type to its corresponding wrapper class object', 'B) Automatic conversion of a wrapper class object to its corresponding primitive type', 'C) Automatic assignment of null to uninitialized variables', 'D) Automatic memory management by the Garbage Collector'], answer: 0 },
+            { q: 'What is the output of System.out.println(5 | 3); (Bitwise OR)', options: ['A) 1', 'B) 7', 'C) 5', 'D) 3'], answer: 1 },
+            { q: 'Which statement about Java packages is true?', options: ['A) A package can contain classes, interfaces, and methods', 'B) A package can contain only classes', 'C) A package name must start with a capital letter', 'D) Two classes in different packages cannot have the same name'], answer: 0 },
+            { q: 'Which mechanism is used to achieve runtime polymorphism in Java?', options: ['A) Method Overloading', 'B) Operator Overloading', 'C) Method Overriding', 'D) Constructor Overloading'], answer: 2 },
+            { q: 'What is the primary function of the JVM (Java Virtual Machine)?', options: ['A) To compile Java source code into bytecode', 'B) To execute the Java bytecode', 'C) To manage the hardware resources', 'D) To create the class files'], answer: 1 },
+            { q: 'Which operator is used to check if an object is an instance of a particular class or interface?', options: ['A) instanceof', 'B) typeOf', 'C) isA', 'D) instance'], answer: 0 },
+            { q: 'What is the difference between "==" and the equals() method for objects?', options: ['A) Both compare object content', 'B) "==" compares content, equals() compares references', 'C) "==" compares references, equals() compares content (if overridden)', 'D) They are always interchangeable'], answer: 2 },
+            { q: 'What will be the output of the following code? int x = 10; x++; System.out.println(x);', options: ['A) 10', 'B) 11', 'C) 9', 'D) Compilation error'], answer: 1 },
+            { q: 'Which keyword is used to explicitly throw an exception?', options: ['A) throws', 'B) throwable', 'C) throw', 'D) finally'], answer: 2 },
+            { q: 'Which access modifier is the most restrictive?', options: ['A) default', 'B) protected', 'C) private', 'D) public'], answer: 2 },
+            { q: 'What is the purpose of the "final" keyword when applied to a method?', options: ['A) To make the method static', 'B) To prevent the method from being overridden', 'C) To ensure the method returns a value', 'D) To hide the method from other classes'], answer: 1 },
+            { q: 'What is the default block in a switch statement used for?', options: ['A) To execute code when none of the case constants match the switch expression', 'B) It is mandatory and always executes first', 'C) It is executed only if a break statement is present', 'D) It is only used with String switch expressions'], answer: 0 },
+            { q: 'Q41. In Java, which statement about strings is correct when used in a complex program structure?', options: ['A) Strings can only be defined once per package', 'B) Strings can be manipulated using a wide range of built-in methods', 'C) Strings cannot interact with each other dynamically', 'D) Strings must always be declared static'], answer: 1 },
+            { q: 'Q42. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or multidimensional as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q43. In Java, which statement about variables is correct when used in a complex program structure?', options: ['A) Variables can only be defined once per package', 'B) Variables can be declared and initialized dynamically as needed', 'C) Variables cannot interact with each other dynamically', 'D) Variables must always be declared static'], answer: 1 },
+            { q: 'Q44. In Java, which statement about classes is correct when used in a complex program structure?', options: ['A) Classes can only be defined once per package', 'B) Classes can be inherited and extended as needed', 'C) Classes cannot interact with each other dynamically', 'D) Classes must always be declared static'], answer: 1 },
+            { q: 'Q45. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be instantiated multiple times and interact dynamically', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q46. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be overloaded and overridden as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q47. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested for complex iteration patterns', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q48. In Java, which statement about inheritance is correct when used in a complex program structure?', options: ['A) Inheritance can only be defined once per package', 'B) Inheritance allows for code reuse and hierarchical organization', 'C) Inheritance cannot interact with each other dynamically', 'D) Inheritance must always be declared static'], answer: 1 },
+            { q: 'Q49. In Java, which statement about polymorphism is correct when used in a complex program structure?', options: ['A) Polymorphism can only be defined once per package', 'B) Polymorphism enables objects to take on multiple forms, improving flexibility', 'C) Polymorphism cannot interact with each other dynamically', 'D) Polymorphism must always be declared static'], answer: 1 },
+            { q: 'Q50. In Java, which statement about encapsulation is correct when used in a complex program structure?', options: ['A) Encapsulation can only be defined once per package', 'B) Encapsulation binds data and methods, providing data hiding', 'C) Encapsulation cannot interact with each other dynamically', 'D) Encapsulation must always be declared static'], answer: 1 },
+            { q: 'Q51. In Java, which statement about abstraction is correct when used in a complex program structure?', options: ['A) Abstraction can only be defined once per package', 'B) Abstraction hides implementation details and shows only necessary information', 'C) Abstraction cannot interact with each other dynamically', 'D) Abstraction must always be declared static'], answer: 1 },
+            { q: 'Q52. In Java, which statement about interface is correct when used in a complex program structure?', options: ['A) Interface can only be defined once per package', 'B) Interface allows for total abstraction and supports multiple inheritance of type', 'C) Interface cannot interact with each other dynamically', 'D) Interface must always be declared static'], answer: 1 },
+            { q: 'Q53. In Java, which statement about exception is correct when used in a complex program structure?', options: ['A) Exception can only be defined once per package', 'B) Exception handling manages runtime errors gracefully', 'C) Exception cannot interact with each other dynamically', 'D) Exception must always be declared static'], answer: 1 },
+            { q: 'Q54. In Java, which statement about threads is correct when used in a complex program structure?', options: ['A) Threads can only be defined once per package', 'B) Threads allow for concurrent execution of parts of a program', 'C) Threads cannot interact with each other dynamically', 'D) Threads must always be declared static'], answer: 1 },
+            { q: 'Q55. In Java, which statement about collections is correct when used in a complex program structure?', options: ['A) Collections can only be defined once per package', 'B) Collections provide a unified framework for storing and manipulating groups of objects', 'C) Collections cannot interact with each other dynamically', 'D) Collections must always be declared static'], answer: 1 },
+            { q: 'Q56. Q56. In Java, which statement about classes is correct when used in a complex program structure?', options: ['A) Classes can only be defined once per package', 'B) Classes can be nested or overloaded as needed', 'C) Classes cannot interact with each other dynamically', 'D) Classes must always be declared static'], answer: 1 },
+            { q: 'Q57. Q57. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be nested or overloaded as needed', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q58. Q58. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be nested or overloaded as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q59. Q59. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested or overloaded as needed', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q60. Q60. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or overloaded as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q61. Q61. In Java, which statement about classs is correct when used in a complex program structure?', options: ['A) Classs can only be defined once per package', 'B) Classs can be nested or overloaded as needed', 'C) Classs cannot interact with each other dynamically', 'D) Classs must always be declared static'], answer: 1 },
+            { q: 'Q62. Q62. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be nested or overloaded as needed', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q63. Q63. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be nested or overloaded as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q64. Q64. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested or overloaded as needed', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q65. Q65. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or overloaded as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q66. Q66. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be nested or overloaded as needed', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q67. Q67. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be nested or overloaded as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q68. Q68. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested or overloaded as needed', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q69. Q69. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or overloaded as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q70. Q70. In Java, which statement about classs is correct when used in a complex program structure?', options: ['A) Classs can only be defined once per package', 'B) Classs can be nested or overloaded as needed', 'C) Classs cannot interact with each other dynamically', 'D) Classs must always be declared static'], answer: 1 },
+
+            // Q71-Q170 (1-100 from Java_Objective_Questions (2).pdf)
+            { q: 'Which of the following best describes encapsulation in Java?', options: ['A. Binding data and methods that operate on the data into a single unit', 'B. Using multiple inheritance', 'C. Hiding implementation using abstract classes', 'D. Using final keyword'], answer: 0 },
+            { q: 'What will happen if you try to access a private variable of a class from outside the class?', options: ['A. It will compile and run successfully', 'B. Compilation error', 'C. Runtime error', 'D. Throws an exception'], answer: 1 },
+            { q: 'Which method is automatically called when an object is created in Java?', options: ['A. start()', 'B. init()', 'C. constructor', 'D. finalize()'], answer: 2 },
+            { q: 'What is the default value of a boolean variable in a Java class?', options: ['A. true', 'B. false', 'C. null', 'D. undefined'], answer: 1 },
+            { q: 'What is the output of the following code? int[] arr = new int[5]; System.out.println(arr[2]);', options: ['A. 0', 'B. null', 'C. undefined', 'D. Compilation error'], answer: 0 },
+            { q: 'Which of the following statements about constructors in Java is true?', options: ['A. They can return values', 'B. They can be inherited', 'C. They initialize objects', 'D. They must be private'], answer: 2 },
+            { q: 'In Java, which statement about interface is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about exception is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about inheritance is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about polymorphism is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about loop is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about array is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 0 },
+            { q: 'In Java, which statement about class is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about object is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about encapsulation is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about abstraction is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about constructor is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about garbage collection is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about package is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about import is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about variable is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about final is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about static is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about public is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about private is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about protected is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about default is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about break is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about continue is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about switch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about if is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about else is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about while is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about do-while is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about for is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about string is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about arraylist is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about hashmap is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about treeset is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about linkedlist is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stack is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about queue is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about set is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about list is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about map is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about exception handling is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about try-catch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about finally is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about synchronized is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about volatile is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about transient is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about native is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about strictfp is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about assert is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about enum is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about default method is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about lambda is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about functional interface is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method reference is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stream is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about optional is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about module is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about jshell is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about records is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about sealed classes is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about instanceof pattern matching is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about switch expressions is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about text blocks is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about local-variable type inference is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about private interface methods is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about diamond operator is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about try-with-resources is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about multi-catch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about safe varargs is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about strings in switch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about numeric literals with underscores is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about binary literals is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about generics is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about wildcard is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about bounded type parameter is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about type erasure is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about collection framework is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about iterators is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about comparable and comparator is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about serialization is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about externalization is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about classpath is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about JVM architecture is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about JIT compiler is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about classloader is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about heap memory is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stack memory is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method area is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about exception handling is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about checked exception is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about unchecked exception is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about error is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread life cycle is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread synchronization is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about inter-thread communication is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about deadlock is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about daemon thread is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread pool is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about executors framework is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about futures is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about callable and future is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about concurrent collections is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about concurrent hashmap is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about concurrent arraylist is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about atomic variables is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about lock interface is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about reentrantlock is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about readwritelock is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about semaphores is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about countdownlatch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about cyclicbarrier is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about phaser is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stream api is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about functional interfaces is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about lambda expressions is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method references is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about optional class is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about module system is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about records class is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about sealed types is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about text blocks is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about switch expressions is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about pattern matching for instanceof is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 }
+        ];
+
+        // --- Global State ---
+        let currentQuestionIndex = 0;
+        let answers = new Array(allQuestions.length).fill(null); // Stores user's selected index (0-3) or null
+        let score = 0;
+
+        // Total number of questions
+        const TOTAL_QUESTIONS = allQuestions.length;
+
+        // --- DOM Elements ---
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackMessageEl = document.getElementById('feedback-message');
+        const scoreDisplayEl = document.getElementById('score-display');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const jumpInput = document.getElementById('jump-input');
+        const jumpButton = document.getElementById('jump-button');
+
+        // Update the max value for the jump input
+        jumpInput.max = TOTAL_QUESTIONS;
+        jumpInput.placeholder = `Go to Q# (1-${TOTAL_QUESTIONS})`;
+
+        // --- Core Functions ---
+
+        /**
+         * Renders the current question and its options.
+         */
+        function renderQuestion() {
+            const qData = allQuestions[currentQuestionIndex];
+            const userAnswer = answers[currentQuestionIndex];
+
+            // 1. Update Question Number
+            questionNumberEl.textContent = `Q${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS}`;
+            questionTextEl.textContent = qData.q;
+
+            // 2. Clear and Render Options
+            optionsContainerEl.innerHTML = '';
+            qData.options.forEach((optionText, index) => {
+                const button = document.createElement('button');
+                button.textContent = optionText;
+                button.dataset.index = index;
+                button.classList.add('option-button'); // Use custom class
+
+                // Base styling
+                let classes = 'w-full option-button rounded-lg border-2 font-medium shadow-sm';
+
+                if (userAnswer !== null) {
+                    // Question has been answered, apply feedback colors
+                    if (index === qData.answer) {
+                        // Correct Answer (Green)
+                        classes += ' bg-green-500 border-green-600 text-white shadow-lg';
+                    } else if (index === userAnswer && index !== qData.answer) {
+                        // User's Wrong Answer (Red)
+                        classes += ' bg-red-500 border-red-600 text-white shadow-lg';
+                    } else {
+                        // Unselected neutral option
+                        classes += ' bg-white border-gray-200 text-gray-700 opacity-60';
+                    }
+                    button.disabled = true; // Disable if already answered
+                } else {
+                    // Not yet answered, allow selection
+                    classes += ' bg-white border-gray-300 hover:bg-gray-100 text-gray-800 cursor-pointer';
+                    button.onclick = () => selectAnswer(index);
+                }
+
+                button.className = classes; // Apply all accumulated classes
+                optionsContainerEl.appendChild(button);
+            });
+
+            // 3. Update Navigation Buttons
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === (TOTAL_QUESTIONS - 1);
+
+            // 4. Update Feedback Area
+            updateScoreAndFeedback(userAnswer);
+        }
+
+        /**
+         * Handles the user selecting an answer.
+         * @param {number} selectedIndex The index of the selected option (0-3).
+         */
+        function selectAnswer(selectedIndex) {
+            if (answers[currentQuestionIndex] !== null) return; // Prevent double-clicking
+
+            const qData = allQuestions[currentQuestionIndex];
+            answers[currentQuestionIndex] = selectedIndex;
+
+            // Recalculate score from scratch for robustness
+            score = answers.filter((ans, i) => ans !== null && ans === allQuestions[i].answer).length;
+
+            // Rerender to show colors and feedback
+            renderQuestion();
+        }
+
+        /**
+         * Updates the score and the text feedback area.
+         * @param {number|null} userAnswer The index of the user's answer for the current question.
+         */
+        function updateScoreAndFeedback(userAnswer) {
+            const qData = allQuestions[currentQuestionIndex];
+            const totalAnswered = answers.filter(a => a !== null).length;
+            
+            // 1. Update Header Score
+            scoreDisplayEl.textContent = `Score: ${score} / ${totalAnswered} Answered`;
+
+            // 2. Update Feedback Message
+            if (userAnswer !== null) {
+                if (userAnswer === qData.answer) {
+                    feedbackMessageEl.textContent = `Correct! (Current Score: ${score} / ${TOTAL_QUESTIONS})`;
+                    feedbackMessageEl.className = 'font-semibold text-green-600';
+                } else {
+                    feedbackMessageEl.textContent = `Wrong! Correct answer highlighted in green. (Current Score: ${score} / ${TOTAL_QUESTIONS})`;
+                    feedbackMessageEl.className = 'font-semibold text-red-600';
+                }
+                feedbackMessageEl.classList.remove('hidden');
+            } else {
+                feedbackMessageEl.classList.add('hidden');
+                feedbackMessageEl.textContent = '';
+            }
+        }
+
+        /**
+         * Navigates to the next question.
+         */
+        function nextQuestion() {
+            if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        /**
+         * Navigates to the previous question.
+         */
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        /**
+         * Jumps to a specific question number (1-indexed).
+         */
+        function goToQuestion() {
+            const targetQ = parseInt(jumpInput.value, 10);
+
+            if (targetQ >= 1 && targetQ <= TOTAL_QUESTIONS) {
+                currentQuestionIndex = targetQ - 1;
+                renderQuestion();
+                jumpInput.value = ''; // Clear input after successful jump
+            } else {
+                // Flash the input red for invalid input (instead of alert)
+                jumpInput.placeholder = `Invalid! (1 to ${TOTAL_QUESTIONS})`;
+                jumpInput.classList.add('border-red-500', 'text-red-500');
+                setTimeout(() => {
+                    jumpInput.placeholder = `Go to Q# (1-${TOTAL_QUESTIONS})`;
+                    jumpInput.classList.remove('border-red-500', 'text-red-500');
+                }, 1500);
+            }
+        }
+
+        /**
+         * Ends the quiz and shows final results.
+         */
+        function endQuiz() {
+            const totalAnswered = answers.filter(a => a !== null).length;
+            const unanswered = TOTAL_QUESTIONS - totalAnswered;
+            
+            const message = `Your Final Score is: ${score} / ${TOTAL_QUESTIONS}\n\nYou answered ${totalAnswered} questions and got ${score} correct.\n\n${unanswered > 0 ? `You skipped ${unanswered} questions.` : 'All questions were answered!'}`;
+
+            questionTextEl.textContent = message;
+            questionNumberEl.textContent = 'Quiz Summary';
+            optionsContainerEl.innerHTML = `
+                <div class="p-6 bg-gray-50 rounded-lg shadow-inner text-center">
+                    <p class="text-xl font-bold text-gray-800 mb-2">Quiz Complete!</p>
+                    <p class="text-gray-600">${message.replace(/\n/g, '<br>')}</p>
+                </div>
+            `;
+            
+            feedbackMessageEl.classList.add('hidden');
+
+
+            // Disable all main buttons except the Restart button (which replaces Next)
+            [prevBtn, endQuizBtn, jumpButton].forEach(btn => btn.disabled = true);
+
+            // Set up restart button
+            nextBtn.textContent = 'Restart Quiz';
+            nextBtn.classList.remove('bg-indigo-600');
+            nextBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            nextBtn.disabled = false;
+            nextBtn.onclick = () => {
+                location.reload(); // Simple refresh to restart the state
+            };
+        }
+
+        // --- Event Listeners ---
+        prevBtn.onclick = prevQuestion;
+        nextBtn.onclick = nextQuestion;
+        jumpButton.onclick = goToQuestion;
+        endQuizBtn.onclick = endQuiz;
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for Firebase to (try to) initialize before starting the app loop
+            const checkInit = setInterval(() => {
+                if (window.app_initialized) {
+                    clearInterval(checkInit);
+                    renderQuestion();
+                }
+            }, 100);
+        });
+
+    </script>
+</body>
+</html>
