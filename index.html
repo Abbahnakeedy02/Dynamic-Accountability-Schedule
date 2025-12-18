@@ -154,7 +154,8 @@
         </div>
         <div id="stats-text" style="margin-top: 5px; font-weight: bold; font-size: 0.9rem;">Success Rate: 0%</div>
         <div>Current Time: <span id="current-time">00:00:00</span></div>
-        <div id="alarm-status"> <button id="startApp" onclick="activateApp()" id="enable-audio" onclick="unlockAudio()"
+        <div id="alarm-status"> 
+            <button id="startApp" onclick="initSession()"
                 style="width:100%; padding:15px; background:#2ecc71; color:white; border:none; border-radius:8px; font-weight:bold; margin-bottom:10px;">
                 🚀 Start Session & Enable Audio
             </button> Alarm: Standby</div>
@@ -181,29 +182,41 @@
             "12:00-13:00", "13:00-15:00", "15:00-16:00", "16:00-18:00",
             "18:00-19:00", "19:00-20:00", "20:00-21:00", "21:00-23:00", "23:00-23:59"
         ];
-        function activateApp() {
-            // Play and immediately pause sound to "unlock" audio
-            const audio = document.getElementById('alarmSound');
-            audio.play().then(() => {
-                audio.pause();
-                audio.currentTime = 0;
-            }).catch(e => console.log("Audio unlock failed"));
+        let isActive = false;
 
-            // Request Notification permission
-            if ("Notification" in window) {
-                Notification.requestPermission();
-            }
+// 1. Combined Activation Function
+function initSession() {
+    const audio = document.getElementById('alarmSound');
+    
+    // Unlock Audio
+    audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        isActive = true;
+        document.getElementById('startApp').style.display = 'none';
+        document.getElementById('alarm-status').innerText = "Alarm: Ready";
+    }).catch(e => alert("Please tap again to enable audio."));
 
-            // Hide the button after activation
-            document.getElementById('startApp').style.display = 'none';
-        }
-        function sendNotification(taskName) {
-            if (window.Notification && Notification.permission === "granted") {
-                new Notification("Task Reminder", { body: taskName });
-            }
-        }
+    // Request Notification Permission
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
+}
 
-
+// 2. Reliable Mobile Notifications
+function sendNotification(taskName) {
+    if (Notification.permission === "granted") {
+        // Mobile browsers prefer showing notifications via the Service Worker
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification("Task Reminder", {
+                body: Time for: ${taskName},
+                icon: "https://cdn-icons-png.flaticon.com/512/311/311101.png",
+                vibrate: [200, 100, 200]
+            });
+        });
+    }
+}
+    
         function confirmTask(id) {
             // UNLOCK AUDIO: This allows the alarm to ring later automatically
             const audio = document.getElementById('alarmSound');
@@ -443,5 +456,6 @@
 
     </script>
 </body>
+
 
 </html>
