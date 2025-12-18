@@ -155,11 +155,12 @@
         </div>
         <div id="stats-text" style="margin-top: 5px; font-weight: bold; font-size: 0.9rem;">Success Rate: 0%</div>
         <div>Current Time: <span id="current-time">00:00:00</span></div>
-        <div id="alarm-status"> 
+        <div id="alarm-status">
             <button id="startApp" onclick="initSession()"
                 style="width:100%; padding:15px; background:#2ecc71; color:white; border:none; border-radius:8px; font-weight:bold; margin-bottom:10px;">
                 🚀 Start Session & Enable Audio
-            </button> Alarm: Standby</div>
+            </button> Alarm: Standby
+        </div>
     </div>
 
     <div class="table-container">
@@ -185,40 +186,42 @@
         ];
         let isActive = false;
 
-// 1. Combined Activation Function
-function initSession() {
-    const audio = document.getElementById('alarmSound');
-    
-    // Unlock Audio
-    audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        isActive = true;
-        document.getElementById('startApp').style.display = 'none';
-        document.getElementById('alarm-status').innerText = "Alarm: Ready";
-    }).catch(e => alert("Please tap again to enable audio."));
+        // 1. Combined Activation Function
+        function initSession() {
+            const audio = document.getElementById('alarmSound');
 
-    // Request Notification Permission
-    if ("Notification" in window) {
-        Notification.requestPermission();
-    }
-}
+            // Unlock Audio
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+                isActive = true;
+                document.getElementById('startApp').style.display = 'none';
+                document.getElementById('alarm-status').innerText = "Alarm: Ready";
+            }).catch(e => alert("Please tap again to enable audio."));
 
-// 2. Reliable Mobile Notifications
-function sendNotification(taskName) {
-    if (Notification.permission === "granted") {
-        // This wakes up the service worker to show the alert offline
-        navigator.serviceWorker.ready.then(registration => {
-            registration.showNotification("Task Reminder", {
-                body: Starting: ${taskName},
-                vibrate: [200, 100, 200],
-                tag: 'task-alert', // Prevents multiple notifications from stacking
-                renotify: true
-            });
-        });
-    }
-}
-    
+            // Request Notification Permission
+            if ("Notification" in window) {
+                Notification.requestPermission();
+            }
+        }
+
+        // 2. Reliable Mobile Notifications
+        function sendNotification(taskName) {
+            if (Notification.permission === "granted") {
+                // This method works even when the browser is 'asleep' or offline
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("Task Reminder", {
+                        body: `Time for: ${taskName}`,
+                        icon: "https://cdn-icons-png.flaticon.com/512/311/311101.png",
+                        badge: "https://cdn-icons-png.flaticon.com/512/311/311101.png",
+                        vibrate: [200, 100, 200],
+                        tag: 'task-alert',
+                        renotify: true
+                    });
+                });
+            }
+        }
+
         function confirmTask(id) {
             // UNLOCK AUDIO: This allows the alarm to ring later automatically
             const audio = document.getElementById('alarmSound');
@@ -310,25 +313,25 @@ function sendNotification(taskName) {
                     isCurrentInterval = (nowTimeVal >= startTimeVal && nowTimeVal < endTimeVal);
                 }
                 // Find this block in checkLogic and replace it:
-if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
-    const alarm = document.getElementById('alarmSound');
-    let playCount = 0;
+                if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
+                    const alarm = document.getElementById('alarmSound');
+                    let playCount = 0;
 
-    const playSequence = () => {
-        if (playCount < 3) {
-            alarm.play();
-            playCount++;
-            document.getElementById('alarm-status').innerText = `ALARM RINGING (${playCount}/3)`;
-        } else {
-            alarm.removeEventListener('ended', playSequence);
-            document.getElementById('alarm-status').innerText = "Alarm: Standby";
-        }
-    };
+                    const playSequence = () => {
+                        if (playCount < 3) {
+                            alarm.play();
+                            playCount++;
+                            document.getElementById('alarm-status').innerText = `ALARM RINGING (${playCount}/3)`;
+                        } else {
+                            alarm.removeEventListener('ended', playSequence);
+                            document.getElementById('alarm-status').innerText = "Alarm: Standby";
+                        }
+                    };
 
-    alarm.addEventListener('ended', playSequence);
-    playSequence(); // Start first play
-    sendNotification(timeSlots[sIdx]); // Trigger notification
-}
+                    alarm.addEventListener('ended', playSequence);
+                    playSequence(); // Start first play
+                    sendNotification(timeSlots[sIdx]); // Trigger notification
+                }
                 const cellId = `${dayIdx}-${sIdx}`;
                 const element = document.getElementById(cellId);
 
@@ -467,52 +470,45 @@ if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
         }
         let wakeLock = null;
 
-async function requestWakeLock() {
-    try {
-        if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-            console.log('Wake Lock is active!');
-            
-            // Re-request if the app is minimized and then brought back
-            wakeLock.addEventListener('release', () => {
-                console.log('Wake Lock was released');
-            });
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock is active!');
+
+                    // Re-request if the app is minimized and then brought back
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock was released');
+                    });
+                }
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
         }
-    } catch (err) {
-        console.error(`${err.name}, ${err.message}`);
-    }
-}
 
-// Update your existing activateApp function to include the lock
-function activateApp() {
-    const audio = document.getElementById('alarmSound');
-    
-    audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        isSessionActive = true;
-        
-        // REQUEST WAKE LOCK HERE
-        requestWakeLock();
+        // Update your existing activateApp function to include the lock
+        function activateApp() {
+            const audio = document.getElementById('alarmSound');
 
-        document.getElementById('startApp').style.display = 'none';
-        document.getElementById('alarm-status').innerText = "System: Online & Awake";
-    }).catch(e => alert("Tap again to enable."));
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+                isActive = true;
 
-    if ("Notification" in window) {
-        Notification.requestPermission();
-    }
-}
+                // REQUEST WAKE LOCK HERE
+                requestWakeLock();
+
+                document.getElementById('startApp').style.display = 'none';
+                document.getElementById('alarm-status').innerText = "System: Online & Awake";
+            }).catch(e => alert("Tap again to enable."));
+
+            if ("Notification" in window) {
+                Notification.requestPermission();
+            }
+        }
 
     </script>
 </body>
 
 
 </html>
-
-
-
-
-
-
-
