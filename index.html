@@ -307,16 +307,26 @@ function sendNotification(taskName) {
                 } else {
                     isCurrentInterval = (nowTimeVal >= startTimeVal && nowTimeVal < endTimeVal);
                 }
-                // Inside your checkLogic alarm block:
-                if (nowTimeVal === startTimeVal && now.getSeconds() < 2) {
-                    // ... your existing repeat alarm logic ...
+                // Find this block in checkLogic and replace it:
+if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
+    const alarm = document.getElementById('alarmSound');
+    let playCount = 0;
 
-                    // Trigger the push notification
-                    const currentSlot = timeSlots[sIdx];
-                    sendNotification(`Your ${currentSlot} task is starting!`);
-                }
+    const playSequence = () => {
+        if (playCount < 3) {
+            alarm.play();
+            playCount++;
+            document.getElementById('alarm-status').innerText = ALARM RINGING (${playCount}/3);
+        } else {
+            alarm.removeEventListener('ended', playSequence);
+            document.getElementById('alarm-status').innerText = "Alarm: Standby";
+        }
+    };
 
-
+    alarm.addEventListener('ended', playSequence);
+    playSequence(); // Start first play
+    sendNotification(timeSlots[sIdx]); // Trigger notification
+}
                 const cellId = `${dayIdx}-${sIdx}`;
                 const element = document.getElementById(cellId);
 
@@ -459,3 +469,4 @@ function sendNotification(taskName) {
 
 
 </html>
+
