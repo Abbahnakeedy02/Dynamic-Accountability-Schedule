@@ -19,3 +19,16 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+// Add this to your sw.js
+self.addEventListener('periodicsync', (event) => {
+    if (event.tag === 'check-tasks') {
+        event.waitUntil(checkTasksAndNotify());
+    }
+});
+
+async function checkTasksAndNotify() {
+    // Note: This is advanced and requires the app to be "Installed" 
+    // and usually requires a browser that supports Periodic Sync.
+    console.log("Checking tasks in background...");
+}
+
