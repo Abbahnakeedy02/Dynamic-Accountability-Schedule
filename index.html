@@ -209,7 +209,7 @@ function sendNotification(taskName) {
         // Mobile browsers prefer showing notifications via the Service Worker
         navigator.serviceWorker.ready.then(registration => {
             registration.showNotification("Task Reminder", {
-                body: Time for: ${taskName},
+                body: `Time for: ${taskName}`,
                 icon: "https://cdn-icons-png.flaticon.com/512/311/311101.png",
                 vibrate: [200, 100, 200]
             });
@@ -469,4 +469,5 @@ if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
 
 
 </html>
+
 
