@@ -316,7 +316,7 @@ if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
         if (playCount < 3) {
             alarm.play();
             playCount++;
-            document.getElementById('alarm-status').innerText = ALARM RINGING (${playCount}/3);
+            document.getElementById('alarm-status').innerText = `ALARM RINGING (${playCount}/3)`;
         } else {
             alarm.removeEventListener('ended', playSequence);
             document.getElementById('alarm-status').innerText = "Alarm: Standby";
@@ -469,5 +469,6 @@ if (nowTimeVal === startTimeVal && now.getSeconds() < 2 && isActive) {
 
 
 </html>
+
 
 
